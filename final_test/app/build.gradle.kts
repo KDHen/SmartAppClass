@@ -4,11 +4,11 @@ plugins {
 }
 
 android {
-    namespace = "com.example.s23w1301songlist"
+    namespace = "com.example.final_test"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.example.s23w1301songlist"
+        applicationId = "com.example.final_test"
         minSdk = 24
         targetSdk = 33
         versionCode = 1
@@ -50,13 +50,6 @@ android {
 }
 
 dependencies {
-    implementation("com.squareup.retrofit2:retrofit:2.9.0")
-    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
-
-    implementation("androidx.compose.runtime:runtime-livedata:1.5.4")
-
-    implementation("io.coil-kt:coil-compose:2.5.0")
-    implementation("androidx.navigation:navigation-compose:2.7.5")
 
     implementation("androidx.core:core-ktx:1.9.0")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.2")
