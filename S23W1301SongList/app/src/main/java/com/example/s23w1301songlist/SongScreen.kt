@@ -1,5 +1,8 @@
 package com.example.s23w1301songlist
 
+import android.content.Intent
+import android.net.Uri
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -20,6 +23,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -28,12 +32,17 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavController
+import androidx.core.content.ContextCompat.startActivity
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -55,7 +64,9 @@ fun SongApp(songList: List<Song>) {
         startDestination = SongScreen.List.name,
     ) {
         composable(route = SongScreen.List.name) {
-            SongList(navController, songList)
+            SongList(songList) {
+                navController.navigate(it)
+            }
         }
         composable(route = SongScreen.Detail.name + "/{index}",
             arguments = listOf(
@@ -69,23 +80,23 @@ fun SongApp(songList: List<Song>) {
 }
 
 @Composable
-fun SongList(navController: NavController, songList: List<Song>) {
+fun SongList(songList: List<Song>, onNavigateToDetail: (String) -> Unit) {
     LazyColumn(
         verticalArrangement = Arrangement.spacedBy(16.dp),
         contentPadding = PaddingValues(horizontal = 8.dp)
     ){
         items(songList.size) {
-            SongItem(navController, songList, it)
+            SongItem(it, songList[it], onNavigateToDetail)
         }
     }
 }
 
 @Composable
-fun SongItem(navController: NavController, songList: List<Song>, index: Int) {
+fun SongItem(index: Int, song: Song, onNavigateToDetail: (String) -> Unit) {
 //    var expanded by remember { mutableStateOf(false) }
     Card(
         modifier = Modifier.clickable {
-            navController.navigate("Detail/$index")
+            onNavigateToDetail("Detail/$index")
         },
         elevation = CardDefaults.cardElevation(8.dp)
     ) {
@@ -97,7 +108,7 @@ fun SongItem(navController: NavController, songList: List<Song>, index: Int) {
                 .padding(8.dp)
         ){
             AsyncImage(
-                model = "https://picsum.photos/200/300?random=${songList[index].id}",
+                model = "https://picsum.photos/200/300?random=${song.id}",
                 contentDescription = "노래 앨범 사진",
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
@@ -113,8 +124,8 @@ fun SongItem(navController: NavController, songList: List<Song>, index: Int) {
                 verticalArrangement = Arrangement.SpaceAround
 //                .padding(16.dp)
             ) {
-                TextTitle(songList[index].title)
-                TextSinger(songList[index].singer)
+                TextTitle(song.title)
+                TextSinger(song.singer)
             }
         }
 //        AnimatedVisibility(visible = expanded) {
@@ -135,6 +146,8 @@ fun TextSinger(singer: String) {
 
 @Composable
 fun SongDetail(song: Song) {
+    val context = LocalContext.current
+
     Column(
         modifier = Modifier
             .padding(16.dp)
@@ -182,6 +195,27 @@ fun SongDetail(song: Song) {
                 textAlign = TextAlign.Center
             )
         }
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Button(
+            onClick = {
+                val intent = Intent(
+                    Intent.ACTION_VIEW,
+                    Uri.parse("https://www.youtube.com/results?search_query=노래방+${song.title}")
+                )
+                startActivity(context, intent, null)
+            }
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically
+            ){
+                YoutubeIcon()
+                Spacer(modifier = Modifier.width(16.dp))
+                Text("유튜브 노래방 검색", fontSize = 15.sp)
+            }
+        }
     }
 }
 
@@ -196,5 +230,28 @@ fun RaitingBar(stars: Int) {
                 tint = Color.Red
             )
         }
+    }
+}
+
+@Composable
+fun YoutubeIcon() {
+    Canvas(
+        modifier = Modifier
+            .size(70.dp)
+    ) {
+
+        val path = Path().apply {
+            moveTo(size.width * .43f, size.height * .38f)
+            lineTo(size.width * .72f, size.height * .55f)
+            lineTo(size.width * .43f, size.height * .73f)
+            close()
+        }
+        drawRoundRect(
+            color = Color.Red,
+            cornerRadius = CornerRadius(40f, 40f),
+            size = Size(size.width, size.height * .70f),
+            topLeft = Offset(size.width.times(.0f), size.height.times(.20f))
+        )
+        drawPath(color = Color.White, path = path)
     }
 }
